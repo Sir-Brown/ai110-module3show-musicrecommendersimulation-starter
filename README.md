@@ -25,7 +25,7 @@ My version is purely content-based. It has no other users, so it can't learn fro
 
 ### Features
 
-- **`Song`**: `id`, `title`, `artist`, `genre`, `mood`, `energy`, `tempo_bpm`, `valence`, `danceability`, `acousticness`
+- **`Song`**: `id`, `title`, `artist`, `genre`, `mood`, `energy`, `tempo_bpm`, `valence`, `danceability`, `acousticness`, plus optional advanced fields (`popularity`, `release_decade`, `detailed_mood`, `instrumentalness`, `language`; see Optional Extensions)
 - **`UserProfile`**: `favorite_genre`, `favorite_mood`, `target_energy`, `likes_acoustic`
 
 The catalog (`data/songs.csv`) has 18 songs across 15 genres and 14 moods. The default profile is:
@@ -393,6 +393,216 @@ I set `MOOD_WEIGHT = 0.0` temporarily, ran all seven profiles, then restored it 
 Takeaway: removing mood made the results different, and for happy pop it made them worse. The intense workout song (Gym Hero) beats the happy pop song (Sunrise City) for someone who asked for "happy." Mood is the only thing separating those two, so the original weights were better. The mood check matters most when genre alone cannot choose between songs.
 
 Side note: with the weight at 0, the explanation text still printed "mood match (+0.00)". The reasons are still correct, but a zero-weight match should probably be hidden in a future version.
+
+---
+
+## Optional Extensions
+
+All four optional challenges are implemented. The default run (`python -m src.main`) is unchanged, so every output above is still correct. Each extension is switched on with a command-line option.
+
+```bash
+python -m src.main --mode genre_first      # Challenge 2: pick a ranking strategy
+python -m src.main --diverse               # Challenge 3: penalize repeat artists and genres
+python -m src.main --table                 # Challenge 4: print results as a table
+python -m src.main --advanced              # Challenge 1: also run the advanced-feature profiles
+python -m src.main --profile "chill"       # only run profiles whose name contains "chill"
+```
+
+Options can be combined, for example `python -m src.main --advanced --diverse --table`.
+
+### Challenge 1: Advanced song features
+
+`data/songs.csv` has five new columns: `popularity` (0-100), `release_decade`, `detailed_mood` (for example "nostalgic", "aggressive", "euphoric"), `instrumentalness` (0-1), and `language`. A user profile can now optionally say what it wants for each one. If a profile leaves a preference out, that feature adds nothing, so the original profiles score exactly as before.
+
+| Preference in the profile | Scoring rule | Max points |
+|---|---|---|
+| `preferred_decade` | exact decade match, or half points one decade away | 0.5 |
+| `preferred_detailed_mood` | match | 0.75 |
+| `target_popularity` | closeness to the target, like energy | 0.5 |
+| `prefers_instrumental` | instrumentalness if true, 1 minus it if false | 0.25 |
+| `preferred_language` | match | 0.25 |
+
+`python -m src.main --advanced --profile "dreamy"` shows a profile that wants dreamy, instrumental 2020s lofi:
+
+```
+=== Dreamy Instrumental Study ===
+Profile: lofi / chill / energy 0.35 / likes acoustic: yes
+Also wants: decade 2020, detailed mood dreamy, popularity 55, instrumental True
+
+Top 5 recommendations
+------------------------------------------------------------
+1. Library Rain by Paper Lanterns  --  Score: 6.39
+   - genre match (+2.00)
+   - mood match (+1.00)
+   - energy closeness (+1.00)
+   - acoustic fit (+0.43)
+   - decade match (+0.50)
+   - detailed mood match (+0.75)
+   - popularity closeness (+0.48)
+   - instrumental fit (+0.23)
+
+2. Midnight Coding by LoRoom  --  Score: 6.20
+   - genre match (+2.00)
+   - mood match (+1.00)
+   - energy closeness (+0.93)
+   - acoustic fit (+0.35)
+   - decade match (+0.50)
+   - detailed mood match (+0.75)
+   - popularity closeness (+0.46)
+   - instrumental fit (+0.21)
+
+3. Focus Flow by LoRoom  --  Score: 4.54
+   - genre match (+2.00)
+   - energy closeness (+0.95)
+   - acoustic fit (+0.39)
+   - decade match (+0.50)
+   - popularity closeness (+0.47)
+   - instrumental fit (+0.22)
+
+4. Spacewalk Thoughts by Orbit Bloom  --  Score: 3.31
+   - mood match (+1.00)
+   - energy closeness (+0.93)
+   - acoustic fit (+0.46)
+   - nearby decade (+0.25)
+   - popularity closeness (+0.43)
+   - instrumental fit (+0.24)
+
+5. Moonlit Sonata Remix by Elena Marchetti  --  Score: 2.24
+   - energy closeness (+0.87)
+   - acoustic fit (+0.47)
+   - nearby decade (+0.25)
+   - popularity closeness (+0.40)
+   - instrumental fit (+0.24)
+```
+
+A second profile, "Nostalgic Throwback," wants 1990s nostalgic country:
+
+```
+=== Nostalgic Throwback ===
+Profile: country / nostalgic / energy 0.5 / likes acoustic: yes
+Also wants: decade 1990, detailed mood nostalgic, popularity 50, instrumental False, language en
+
+Top 5 recommendations
+------------------------------------------------------------
+1. Dusty Road Home by Wade Harlan  --  Score: 6.60
+   - genre match (+2.00)
+   - mood match (+1.00)
+   - energy closeness (+0.98)
+   - acoustic fit (+0.41)
+   - decade match (+0.50)
+   - detailed mood match (+0.75)
+   - popularity closeness (+0.47)
+   - instrumental fit (+0.25)
+   - language match (+0.25)
+
+2. Coffee Shop Stories by Slow Stereo  --  Score: 2.92
+   - energy closeness (+0.87)
+   - acoustic fit (+0.45)
+   - detailed mood match (+0.75)
+   - popularity closeness (+0.49)
+   - instrumental fit (+0.11)
+   - language match (+0.25)
+
+3. Autumn Letters by Willow & Pine  --  Score: 2.21
+   - energy closeness (+0.81)
+   - acoustic fit (+0.47)
+   - popularity closeness (+0.44)
+   - instrumental fit (+0.24)
+   - language match (+0.25)
+
+4. Island Breeze by Sunny Roots  --  Score: 2.03
+   - energy closeness (+0.86)
+   - acoustic fit (+0.24)
+   - nearby decade (+0.25)
+   - popularity closeness (+0.45)
+   - instrumental fit (+0.24)
+
+5. Rooftop Lights by Indigo Parade  --  Score: 1.84
+   - energy closeness (+0.74)
+   - acoustic fit (+0.17)
+   - popularity closeness (+0.43)
+   - instrumental fit (+0.24)
+   - language match (+0.25)
+```
+
+### Challenge 2: Multiple scoring modes
+
+Each mode is a small `ScoringMode` object holding four weights, and `score_song` takes the mode as a parameter (a simple Strategy pattern). Adding a new strategy means adding one line to `MODES` in `src/recommender.py`.
+
+| Mode | Genre | Mood | Energy | Acoustic |
+|---|---|---|---|---|
+| `balanced` (default) | 2.0 | 1.0 | 1.0 | 0.5 |
+| `genre_first` | 3.0 | 0.75 | 0.5 | 0.25 |
+| `mood_first` | 1.0 | 3.0 | 1.0 | 0.5 |
+| `energy_focused` | 0.75 | 0.5 | 3.0 | 0.5 |
+
+Top 5 for the High-Energy Pop profile in each mode:
+
+| Mode | Top 5 |
+|---|---|
+| `balanced` | Sunrise City, Gym Hero, Rooftop Lights, Storm Runner, Neon Overdrive |
+| `genre_first` | Sunrise City, Gym Hero, Rooftop Lights, Storm Runner, Iron Throne |
+| `mood_first` | Sunrise City, Rooftop Lights, Gym Hero, Storm Runner, Neon Overdrive |
+| `energy_focused` | Sunrise City, Gym Hero, Storm Runner, Rooftop Lights, Neon Overdrive |
+
+The #1 song is the same in every mode here. The modes mostly reorder the middle of the list: `mood_first` pulls the happy *Rooftop Lights* above *Gym Hero*, and `energy_focused` pulls the loud *Storm Runner* above *Rooftop Lights*.
+
+### Challenge 3: Diversity penalty
+
+With `--diverse`, the top results are picked one at a time. Before each pick, a song loses **1.0 point** if its artist is already in the list and **0.5 points** if its genre is already in the list. The penalty shows up in the song's reasons.
+
+| Profile | Without `--diverse` | With `--diverse` |
+|---|---|---|
+| Chill Lofi | Library Rain, Midnight Coding, Focus Flow, Spacewalk Thoughts, Coffee Shop Stories | Library Rain, Midnight Coding, Spacewalk Thoughts, Focus Flow, Coffee Shop Stories |
+| Deep Intense Rock | Storm Runner, Gym Hero, Neon Overdrive, Iron Throne, Sunrise City | Storm Runner, Gym Hero, Neon Overdrive, Iron Throne, Block Party Anthem |
+| Genre Not in Catalog | Sunrise City, Rooftop Lights, Block Party Anthem, Gym Hero, Night Drive Loop | Sunrise City, Rooftop Lights, Block Party Anthem, Storm Runner, Neon Overdrive |
+
+For Genre Not in Catalog, *Gym Hero* (pop, like the already-chosen *Sunrise City*) is replaced by *Storm Runner*, and *Night Drive Loop* (same artist, Neon Echo, as *Sunrise City*) is replaced by *Neon Overdrive*. That weakens the Gym Hero filter bubble described in the model card. For Chill Lofi, the second LoRoom song (*Focus Flow*) drops from #3 to #4 behind a different artist.
+
+### Challenge 4: Visual summary table
+
+`--table` prints a table with rank, title, artist, score, and the reasons for each score. It uses plain ASCII formatting (no extra library to install). Here it is combined with `--diverse` so the penalty reasons are visible:
+
+```
+=== Chill Lofi ===
+Profile: lofi / chill / energy 0.4 / likes acoustic: yes
+Mode: balanced | diversity penalty: on
+
+Top 5 recommendations
+------------------------------------------------------------
++---+---------------------+----------------+-------+-------------------------------------------+
+| # | Title               | Artist         | Score | Reasons                                   |
++---+---------------------+----------------+-------+-------------------------------------------+
+| 1 | Library Rain        | Paper Lanterns | 4.38  | genre match (+2.00)                       |
+|   |                     |                |       | mood match (+1.00)                        |
+|   |                     |                |       | energy closeness (+0.95)                  |
+|   |                     |                |       | acoustic fit (+0.43)                      |
++---+---------------------+----------------+-------+-------------------------------------------+
+| 2 | Midnight Coding     | LoRoom         | 3.83  | genre match (+2.00)                       |
+|   |                     |                |       | mood match (+1.00)                        |
+|   |                     |                |       | energy closeness (+0.98)                  |
+|   |                     |                |       | acoustic fit (+0.35)                      |
+|   |                     |                |       | diversity penalty (-0.50): genre already  |
+|   |                     |                |       |   recommended                             |
++---+---------------------+----------------+-------+-------------------------------------------+
+| 3 | Spacewalk Thoughts  | Orbit Bloom    | 2.34  | mood match (+1.00)                        |
+|   |                     |                |       | energy closeness (+0.88)                  |
+|   |                     |                |       | acoustic fit (+0.46)                      |
++---+---------------------+----------------+-------+-------------------------------------------+
+| 4 | Focus Flow          | LoRoom         | 1.89  | genre match (+2.00)                       |
+|   |                     |                |       | energy closeness (+1.00)                  |
+|   |                     |                |       | acoustic fit (+0.39)                      |
+|   |                     |                |       | diversity penalty (-1.00): artist already |
+|   |                     |                |       |   recommended                             |
+|   |                     |                |       | diversity penalty (-0.50): genre already  |
+|   |                     |                |       |   recommended                             |
++---+---------------------+----------------+-------+-------------------------------------------+
+| 5 | Coffee Shop Stories | Slow Stereo    | 1.42  | energy closeness (+0.97)                  |
+|   |                     |                |       | acoustic fit (+0.45)                      |
++---+---------------------+----------------+-------+-------------------------------------------+
+```
+
+More detail on how these were built, and how I checked them, is in [ai_interactions.md](ai_interactions.md).
 
 ---
 

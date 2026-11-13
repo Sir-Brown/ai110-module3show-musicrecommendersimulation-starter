@@ -37,14 +37,21 @@ The highest possible score is 4.5. Each point is recorded with a short reason, s
 
 Changes from the starter: I added the acoustic score, made genre and mood matching ignore capital letters, and kept all the weights in one place so they are easy to change for experiments.
 
+**Optional extras.** These are all off by default, so the results above do not change unless one is switched on.
+
+- **Scoring modes:** "genre first," "mood first," and "energy focused" change the weights.
+- **Diversity penalty:** a song loses points if its artist (1.0) or genre (0.5) is already in the list.
+- **Advanced preferences:** a user can also ask for a decade, a detailed mood, a popularity level, instrumental or vocal, and a language.
+- **Table view:** results can be printed as a table that includes the reasons.
+
 ---
 
 ## 4. Data  
 
 - **Size:** 18 songs. The starter had 10, and I added 8.
 - **Variety:** 15 genres and 14 moods. Examples are pop, lofi, rock, jazz, hip hop, classical, EDM, metal, reggae, and folk.
-- **What each song has:** genre, mood, energy, tempo, valence, danceability, and acousticness. Only genre, mood, energy, and acousticness are used for scoring.
-- **Limits:** 13 of the 15 genres have only one song. Only 3 songs have middle energy (between 0.43 and 0.74). There is no "sad" mood. The data has no lyrics, language, release year, or popularity. The numbers were not measured from real audio.
+- **What each song has:** genre, mood, energy, tempo, valence, danceability, and acousticness. I later added five more: popularity, release decade, a detailed mood tag (like "nostalgic"), instrumentalness, and language. The core scoring uses genre, mood, energy, and acousticness. The new attributes only count when a user asks for them.
+- **Limits:** 13 of the 15 genres have only one song. Only 3 songs have middle energy (between 0.43 and 0.74). There is no "sad" mood. There are no lyrics. The numbers, including popularity and decade, are made up for the simulation and were not measured from real audio or real listening.
 
 ---
 
@@ -111,8 +118,10 @@ I also ran one experiment: I turned the mood weight to 0 and ran all seven profi
 ## 8. Future Work  
 
 1. **Smarter genre matching.** Treat close genres as partly matching, so metal counts as near rock instead of being treated like any other genre.
-2. **More variety in the top 5.** Add a rule that lowers a song's score if its artist or genre is already in the list, so one kind of song does not take over.
+2. **Learn from behavior.** Use skips, replays, and playlists instead of only what the user says they like, so the weights can be tuned from real feedback.
 3. **A bigger, more balanced catalog.** Add many more songs, more middle-energy songs, and missing moods such as "sad."
+
+(I already added a diversity penalty as an optional extra. It helps, but it only swaps songs in the top 5. It cannot fix a catalog that is too small.)
 
 ---
 
@@ -124,4 +133,4 @@ I also ran one experiment: I turned the mood weight to 0 and ran all seven profi
 
 **What surprised me.** A handful of simple rules produced lists that felt like real recommendations. Chill Lofi looked just right. But the same simple rules also made *Gym Hero* show up for almost every high-energy user. It looks like taste, but it is just arithmetic. That is how a small bias can look like a personal recommendation.
 
-**What I would try next.** I would try the optional challenges, such as more song features, different scoring modes, a diversity rule, and a clearer results table. I would also look for other ways to improve the program, like smarter genre matching and a bigger catalog.
+**What I would try next.** I went on to try all four optional challenges: more song features, different scoring modes, a diversity rule, and a clearer results table. They helped, but they did not fix the deeper limits: the catalog is tiny, and genre is matched exactly. Next I would try smarter genre matching, a much bigger catalog, and a version that learns from what a user actually plays or skips.
