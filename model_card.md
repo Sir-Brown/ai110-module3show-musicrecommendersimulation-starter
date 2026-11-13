@@ -2,60 +2,58 @@
 
 ## 1. Model Name  
 
-Give your model a short, descriptive name.  
-Example: **VibeFinder 1.0**  
+**VibeMatch 1.0**
 
 ---
 
 ## 2. Intended Use  
 
-Describe what your recommender is designed to do and who it is for. 
+**Goal.** VibeMatch suggests the 5 songs from a small catalog that best fit one person's taste. It does not predict what a real listener will play next. It scores each song against what the user says they like: favorite genre, favorite mood, target energy, and whether they like acoustic music.
 
-Prompts:  
+**Intended use.**
 
-- What kind of recommendations does it generate  
-- What assumptions does it make about the user  
-- Is this for real users or classroom exploration  
+- Classroom exploration of how a recommender turns data into a ranked list.
+- Learning how scoring rules, weights, and ranking work together.
+- It assumes the user can describe their taste in one genre, one mood, and one energy level.
+
+**Not intended for.**
+
+- Real listeners or a real music app. The catalog has only 18 songs.
+- Judging songs, artists, or genres. A low score means "does not match this profile," not "bad music."
+- Any setting where fairness matters. It cannot learn from behavior, and it treats every pair of genres as equally different.
 
 ---
 
 ## 3. How the Model Works  
 
-Explain your scoring approach in simple language.  
+Every song gets points for how well it fits the user. Then the songs are sorted, and the top 5 are shown.
 
-Prompts:  
+- **Genre match:** +2.0 points if the song's genre is the user's favorite.
+- **Mood match:** +1.0 point if the song's mood is the user's favorite.
+- **Energy closeness:** up to +1.0 point. The closer the song's energy is to what the user wants, the more points. A song that is too loud and a song that is too quiet are both penalized.
+- **Acoustic fit:** up to +0.5 points. If the user likes acoustic music, acoustic songs get more. If not, non-acoustic songs get more.
 
-- What features of each song are used (genre, energy, mood, etc.)  
-- What user preferences are considered  
-- How does the model turn those into a score  
-- What changes did you make from the starter logic  
+The highest possible score is 4.5. Each point is recorded with a short reason, so every recommendation can explain itself.
 
-Avoid code here. Pretend you are explaining the idea to a friend who does not program.
+Changes from the starter: I added the acoustic score, made genre and mood matching ignore capital letters, and kept all the weights in one place so they are easy to change for experiments.
 
 ---
 
 ## 4. Data  
 
-Describe the dataset the model uses.  
-
-Prompts:  
-
-- How many songs are in the catalog  
-- What genres or moods are represented  
-- Did you add or remove data  
-- Are there parts of musical taste missing in the dataset  
+- **Size:** 18 songs. The starter had 10, and I added 8.
+- **Variety:** 15 genres and 14 moods. Examples are pop, lofi, rock, jazz, hip hop, classical, EDM, metal, reggae, and folk.
+- **What each song has:** genre, mood, energy, tempo, valence, danceability, and acousticness. Only genre, mood, energy, and acousticness are used for scoring.
+- **Limits:** 13 of the 15 genres have only one song. Only 3 songs have middle energy (between 0.43 and 0.74). There is no "sad" mood. The data has no lyrics, language, release year, or popularity. The numbers were not measured from real audio.
 
 ---
 
 ## 5. Strengths  
 
-Where does your system seem to work well  
-
-Prompts:  
-
-- User types for which it gives reasonable results  
-- Any patterns you think your scoring captures correctly  
-- Cases where the recommendations matched your intuition  
+- Quiet and loud tastes get completely different lists. Chill Lofi and Deep Intense Rock share no songs at all.
+- Chill Lofi works very well. All of its top three songs are lofi.
+- For Deep Intense Rock, the #1 pick (*Storm Runner*) matched my own intuition.
+- Every result comes with plain reasons, such as "genre match (+2.00)," so it is easy to see why a song ranked where it did.
 
 ---
 
@@ -112,23 +110,18 @@ I also ran one experiment: I turned the mood weight to 0 and ran all seven profi
 
 ## 8. Future Work  
 
-Ideas for how you would improve the model next.  
-
-Prompts:  
-
-- Additional features or preferences  
-- Better ways to explain recommendations  
-- Improving diversity among the top results  
-- Handling more complex user tastes  
+1. **Smarter genre matching.** Treat close genres as partly matching, so metal counts as near rock instead of being treated like any other genre.
+2. **More variety in the top 5.** Add a rule that lowers a song's score if its artist or genre is already in the list, so one kind of song does not take over.
+3. **A bigger, more balanced catalog.** Add many more songs, more middle-energy songs, and missing moods such as "sad."
 
 ---
 
 ## 9. Personal Reflection  
 
-A few sentences about your experience.  
+**Biggest learning moment.** I learned how a system can turn preferences into recommendations. My version only uses what the user *says* they like. Real apps also watch what people actually do, such as skips, replays, and playlists, and learn from that. That gap between stated taste and observed behavior was the biggest thing I took away.
 
-Prompts:  
+**How AI helped, and when I double-checked it.** AI helped me plan the scoring rules, write the code, and find weak spots. But I did not trust the numbers on their own. I recalculated scores by hand and compared them to the program's output. I also caught problems that the AI had not predicted. For example, running `main.py` directly from my editor gave a `FileNotFoundError`, because the data path depended on where I ran it from. Some editor warnings were also out of date, so I checked by actually running the code and the tests.
 
-- What you learned about recommender systems  
-- Something unexpected or interesting you discovered  
-- How this changed the way you think about music recommendation apps  
+**What surprised me.** A handful of simple rules produced lists that felt like real recommendations. Chill Lofi looked just right. But the same simple rules also made *Gym Hero* show up for almost every high-energy user. It looks like taste, but it is just arithmetic. That is how a small bias can look like a personal recommendation.
+
+**What I would try next.** I would try the optional challenges, such as more song features, different scoring modes, a diversity rule, and a clearer results table. I would also look for other ways to improve the program, like smarter genre matching and a bigger catalog.
