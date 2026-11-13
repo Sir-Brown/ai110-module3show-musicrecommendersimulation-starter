@@ -17,11 +17,36 @@ SONGS_CSV = Path(__file__).resolve().parent.parent / "data" / "songs.csv"
 LINE = "-" * 60
 
 
-def print_recommendations(user_prefs: dict, recommendations: list) -> None:
+def _profile(genre: str, mood: str, energy: float, acoustic: bool) -> dict:
+    """Build a user taste profile dict."""
+    return {
+        "favorite_genre": genre,
+        "favorite_mood": mood,
+        "target_energy": energy,
+        "likes_acoustic": acoustic,
+    }
+
+
+# Evaluation profiles: three standard users, then four adversarial edge cases.
+PROFILES = {
+    # Standard profiles
+    "High-Energy Pop": _profile("pop", "happy", 0.9, False),
+    "Chill Lofi": _profile("lofi", "chill", 0.4, True),
+    "Deep Intense Rock": _profile("rock", "intense", 0.92, False),
+    # Adversarial / edge-case profiles
+    "Sad but Energetic": _profile("blues", "sad", 0.9, False),  # genre and mood not in catalog
+    "Genre Not in Catalog": _profile("k-pop", "happy", 0.8, False),  # no genre match possible
+    "Acoustic EDM": _profile("edm", "euphoric", 0.95, True),  # high energy but loves acoustic
+    "Dead-Center Energy": _profile("jazz", "relaxed", 0.5, False),  # mid-range target
+}
+
+
+def print_recommendations(name: str, user_prefs: dict, recommendations: list) -> None:
     """Print a readable ranked list with each song's score and scoring reasons."""
     acoustic = "yes" if user_prefs["likes_acoustic"] else "no"
+    print(f"\n=== {name} ===")
     print(
-        f"\nProfile: {user_prefs['favorite_genre']} / {user_prefs['favorite_mood']} / "
+        f"Profile: {user_prefs['favorite_genre']} / {user_prefs['favorite_mood']} / "
         f"energy {user_prefs['target_energy']} / likes acoustic: {acoustic}"
     )
     print(f"\nTop {len(recommendations)} recommendations")
@@ -38,16 +63,9 @@ def main() -> None:
     songs = load_songs(str(SONGS_CSV))
     print(f"Loaded songs: {len(songs)}")
 
-    # Default "pop/happy" profile
-    user_prefs = {
-        "favorite_genre": "pop",
-        "favorite_mood": "happy",
-        "target_energy": 0.8,
-        "likes_acoustic": False,
-    }
-
-    recommendations = recommend_songs(user_prefs, songs, k=5)
-    print_recommendations(user_prefs, recommendations)
+    for name, user_prefs in PROFILES.items():
+        recommendations = recommend_songs(user_prefs, songs, k=5)
+        print_recommendations(name, user_prefs, recommendations)
 
 
 if __name__ == "__main__":
