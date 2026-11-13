@@ -100,7 +100,8 @@ You can add more tests in `tests/test_recommender.py`.
 
 ## Sample Recommendation Output
 
-Paste a sample of your recommender's output here as a text block so a reader can see what it produces:
+Sample output from the Phase 3 default profile (pop / happy / energy 0.8), captured in the plain list format (`--list`). The default output is now a table; see Optional Extensions.
+
 
 ```
 Loaded songs: 18
@@ -140,7 +141,7 @@ Top 5 recommendations
 
 ## Evaluation Profiles
 
-Seven profiles were run through the recommender (top 5 each): three standard users and four adversarial edge cases. Output is copied straight from `python -m src.main`.
+Seven profiles were run through the recommender (top 5 each): three standard users and four adversarial edge cases. Output is copied from `python -m src.main --list` (the plain list format; the default is now a table with the same scores and reasons).
 
 ### Standard profiles
 
@@ -398,17 +399,17 @@ Side note: with the weight at 0, the explanation text still printed "mood match 
 
 ## Optional Extensions
 
-All four optional challenges are implemented. The default run (`python -m src.main`) is unchanged, so every output above is still correct. Each extension is switched on with a command-line option.
+All four optional challenges are implemented. The results table (Challenge 4) is now the default output. The earlier sample outputs above were captured in the plain list format, which is still available with `--list`; the scores and reasons are identical. The other extensions are switched on with command-line options.
 
 ```bash
 python -m src.main --mode genre_first      # Challenge 2: pick a ranking strategy
 python -m src.main --diverse               # Challenge 3: penalize repeat artists and genres
-python -m src.main --table                 # Challenge 4: print results as a table
+python -m src.main --list                  # Challenge 4: the table is the default; --list gives the plain list
 python -m src.main --advanced              # Challenge 1: also run the advanced-feature profiles
 python -m src.main --profile "chill"       # only run profiles whose name contains "chill"
 ```
 
-Options can be combined, for example `python -m src.main --advanced --diverse --table`.
+Options can be combined, for example `python -m src.main --advanced --diverse`.
 
 ### Challenge 1: Advanced song features
 
@@ -422,7 +423,7 @@ Options can be combined, for example `python -m src.main --advanced --diverse --
 | `prefers_instrumental` | instrumentalness if true, 1 minus it if false | 0.25 |
 | `preferred_language` | match | 0.25 |
 
-`python -m src.main --advanced --profile "dreamy"` shows a profile that wants dreamy, instrumental 2020s lofi:
+`python -m src.main --advanced --profile "dreamy" --list` shows a profile that wants dreamy, instrumental 2020s lofi:
 
 ```
 === Dreamy Instrumental Study ===
@@ -561,7 +562,7 @@ For Genre Not in Catalog, *Gym Hero* (pop, like the already-chosen *Sunrise City
 
 ### Challenge 4: Visual summary table
 
-`--table` prints a table with rank, title, artist, score, and the reasons for each score. It uses plain ASCII formatting (no extra library to install). Here it is combined with `--diverse` so the penalty reasons are visible:
+The default output is now a table with rank, title, artist, score, and the reasons for each score. It uses plain ASCII formatting (no extra library to install). Use `--list` for the plain list format. Here it is combined with `--diverse` so the penalty reasons are visible:
 
 ```
 === Chill Lofi ===

@@ -30,7 +30,7 @@ These are summaries of my instructions, not word-for-word copies:
 
 **What did you verify or fix manually?**
 
-- **Nothing broke:** I saved the output of the seven original profiles before changing the code, then compared it after. The two outputs were identical, so the extra features don't change old results. Where a preference is missing, the new code adds zero.
+- **Nothing broke:** I saved the output of the seven original profiles before changing the code, then compared it after. The two outputs were identical (using the plain list format, now `--list`), so the extra features don't change old results. Where a preference is missing, the new code adds zero.
 - **Math check:** the advanced test adds up the expected bonus by hand (0.5 + 0.75 + 0.5 + 0.25 + 0.25 = 2.25) and checks the program's total matches.
 - **Reading the output:** the "Dreamy Instrumental Study" profile put *Library Rain* first, with decade, detailed mood, and instrumental bonuses showing in its reasons, which matched what I expected.
 - **A test of mine failed** (see Challenge 3 below), and the cause was the test data, not the code.
@@ -76,6 +76,6 @@ I asked for a design that keeps the code modular. The AI suggested treating a mo
 
 **Prompt (summary):** show results as a formatted table, and make sure each row includes the reasons for its score.
 
-**What the AI generated:** `format_table` in `src/main.py`. I chose plain ASCII formatting instead of the `tabulate` library, so there is nothing extra to install. Each row shows rank, title, artist, score, and one line per reason, with long reasons wrapped. It is switched on with `--table`.
+**What the AI generated:** `format_table` in `src/main.py`. I chose plain ASCII formatting instead of the `tabulate` library, so there is nothing extra to install. Each row shows rank, title, artist, score, and one line per reason, with long reasons wrapped. It is the default output; `--list` switches back to the plain list format.
 
 **What I verified:** a test checks that the table contains the title, score, and every reason. I also ran it by itself and together with `--diverse` and checked that the penalty lines wrap cleanly.

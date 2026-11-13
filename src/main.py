@@ -6,7 +6,7 @@ Run from the project root with:  python -m src.main
 Options:
   --mode {balanced,genre_first,mood_first,energy_focused}   ranking strategy
   --diverse                                                  penalize repeat artists/genres
-  --table                                                    show results as a table
+  --list                                                     show the plain list format instead of a table
   --advanced                                                 also run the advanced-feature profiles
   --profile NAME                                             only run profiles whose name contains NAME
 """
@@ -110,7 +110,7 @@ def format_table(recommendations: list, reason_width: int = 50) -> str:
 
 def print_recommendations(
     name: str, user_prefs: dict, recommendations: list,
-    mode: str = DEFAULT_MODE, diversity: bool = False, table: bool = False,
+    mode: str = DEFAULT_MODE, diversity: bool = False, table: bool = True,
 ) -> None:
     """Print a readable ranked list (or table) with each song's score and scoring reasons."""
     acoustic = "yes" if user_prefs["likes_acoustic"] else "no"
@@ -148,7 +148,9 @@ def parse_args(argv=None) -> argparse.Namespace:
                         help="ranking strategy (default: balanced)")
     parser.add_argument("--diverse", action="store_true",
                         help="penalize songs whose artist or genre is already in the results")
-    parser.add_argument("--table", action="store_true", help="print results as a table")
+    parser.add_argument("--table", action="store_true", help=argparse.SUPPRESS)  # table is the default; kept so old commands still work
+    parser.add_argument("--list", action="store_true",
+                        help="print the plain list format instead of the default table")
     parser.add_argument("--advanced", action="store_true",
                         help="also run the profiles that use the advanced song attributes")
     parser.add_argument("--profile", help="only run profiles whose name contains this text")
@@ -172,7 +174,7 @@ def main(argv=None) -> None:
         )
         print_recommendations(
             name, user_prefs, recommendations,
-            mode=args.mode, diversity=args.diverse, table=args.table,
+            mode=args.mode, diversity=args.diverse, table=not args.list,
         )
 
 
